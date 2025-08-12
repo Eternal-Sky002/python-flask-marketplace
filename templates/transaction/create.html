@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Transaction{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h1 class="card-title">Create Transaction</h1>
+        {% if not item %}
+            <div class="alert alert-danger">
+                Item tidak ditemukan. Silakan pilih item terlebih dahulu.
+            </div>
+            <a href="{{ url_for('item.list_items') }}" class="btn btn-primary">Kembali ke Daftar Item</a>
+        {% else %}
+            <form action="{{ url_for('transaction.create_transaction', item_id=item.id) }}" method="POST">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ item.name }}</h5>
+                        <p class="card-text">
+                            <strong>Price:</strong> Rp {{ "{:,.0f}".format(item.price) if item.price else '0' }}<br>
+                            {% if item.store %}
+                            <strong>Store:</strong> <a href="{{ url_for('item.view_item_store', store_id=item.store['id']) }}">{{ item.store['name'] }}</a><br>
+                            {% endif %}
+                            {% if item.tags %}
+                            <strong>Tags:</strong><br>
+                            {% for tag in item.tags %}
+                            <span class="badge bg-secondary me-1">{{ tag.name }}</span>
+                            {% endfor %}
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <input type="hidden" name="item_id" value="{{ item.id }}" />
+                
+                <div class="mb-3">
+                    <label for="qty" class="form-label">Quantity</label>
+                    <div class="input-group">
+                        <button type="button" class="btn btn-outline-secondary" onclick="decrementQty()">-</button>
+                        <input type="number" class="form-control text-center" id="qty" name="qty" min="1" value="1" required>
+                        <button type="button" class="btn btn-outline-secondary" onclick="incrementQty()">+</button>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#confirmPurchaseModal">
+                        <i class="fas fa-shopping-cart me-2"></i>Create Transaction
+                    </button>
+                    <a href="{{ url_for('item.list_items') }}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+
+            <!-- Confirmation Modal -->
+            <div class="modal fade" id="confirmPurchaseModal" tabindex="-1" aria-labelledby="confirmPurchaseModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmPurchaseModalLabel">Konfirmasi Pembelian</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Apakah Anda yakin ingin membeli barang ini?</p>
+                            <div class="alert alert-info">
+                                <strong>Item:</strong> {{ item.name }}<br>
+                                <strong>Harga:</strong> Rp {{ "{:,.0f}".format(item.price) }}<br>
+                                <strong>Jumlah:</strong> <span id="modalQty">1</span><br>
+                                <strong>Total:</strong> Rp <span id="modalTotal">{{ "{:,.0f}".format(item.price) }}</span>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="button" class="btn btn-success" onclick="submitForm()">Ya, Beli Sekarang</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                // Function to initialize modal content
+                function initializeModal() {
+                    updateModalTotal();
+                }
+
+                function incrementQty() {
+                    const qtyInput = document.getElementById('qty');
+                    qtyInput.value = parseInt(qtyInput.value) + 1;
+                    updateModalTotal();
+                }
+
+                function decrementQty() {
+                    const qtyInput = document.getElementById('qty');
+                    const currentValue = parseInt(qtyInput.value);
+                    if (currentValue > 1) {
+                        qtyInput.value = currentValue - 1;
+                        updateModalTotal();
+                    }
+                }
+
+                function updateModalTotal() {
+                    const qty = parseInt(document.getElementById('qty').value);
+                    const price = parseInt("{{ item.price }}");
+                    const total = qty * price;
+                    document.getElementById('modalQty').textContent = qty;
+                    document.getElementById('modalTotal').textContent = new Intl.NumberFormat('id-ID').format(total);
+                }
+
+                function submitForm() {
+                    document.querySelector('form').submit();
+                }
+
+                // Update modal when qty input changes
+                document.getElementById('qty').addEventListener('input', updateModalTotal);
+                
+                // Initialize modal content when modal is shown
+                document.getElementById('confirmPurchaseModal').addEventListener('show.bs.modal', initializeModal);
+            </script>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

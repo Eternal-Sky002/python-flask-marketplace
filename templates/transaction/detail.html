@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Transaction Details{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h1 class="card-title">Transaction #{{ transaction.id }}</h1>
+        <p class="card-text">
+            <strong>Item:</strong> {{ transaction.item['name'] }}<br>
+            <strong>Quantity:</strong> {{ transaction.qty }}<br>
+            <strong>Price:</strong> Rp {{ "{:,.0f}".format(transaction.item['price']) }}<br>
+            <strong>Total Price:</strong> Rp {{ "{:,.0f}".format(transaction.item['price']*transaction.qty) }}<br>
+            <strong>Status:</strong> {{ transaction.transaction_status['nama_status'] }}<br>
+            <strong>Date:</strong> {{ transaction.transaction_time.strftime('%H:%M:%S %d-%m-%Y') if transaction.transaction_time else 'N/A' }}
+        </p>
+
+        {% if transaction.transaction_status['nama_status'] == 'PAYMENT' %}
+        <form id="paymentForm" action="{{ url_for('transaction.update_transaction_status', transaction_id=transaction.id) }}" method="POST" class="mb-3">
+            <input type="hidden" name="status" value="2">
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#confirmPaymentModal">
+                Pay Now
+            </button>
+        </form>
+        <form id="cancelForm" action="{{ url_for('transaction.update_transaction_status', transaction_id=transaction.id) }}" method="POST">
+            <input type="hidden" name="status" value="3">
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmCancelModal">
+                Cancel Transaction
+            </button>
+        </form>
+
+        <!-- Payment Confirmation Modal -->
+        <div class="modal fade" id="confirmPaymentModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Konfirmasi Pembayaran</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Apakah Anda yakin ingin melakukan pembayaran untuk transaksi ini?</p>
+                        <div class="alert alert-info">
+                            <strong>Item:</strong> {{ transaction.item['name'] }}<br>
+                            <strong>Quantity:</strong> {{ transaction.qty }}<br>
+                            <strong>Total:</strong> Rp {{ "{:,.0f}".format(transaction.item['price']*transaction.qty) }}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-success" onclick="document.getElementById('paymentForm').submit()">
+                            Ya, Bayar Sekarang
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cancel Confirmation Modal -->
+        <div class="modal fade" id="confirmCancelModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Konfirmasi Pembatalan</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Apakah Anda yakin ingin membatalkan transaksi ini?</p>
+                        <div class="alert alert-warning">
+                            Transaksi yang dibatalkan tidak dapat dikembalikan.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tidak</button>
+                        <button type="button" class="btn btn-danger" onclick="document.getElementById('cancelForm').submit()">
+                            Ya, Batalkan Transaksi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <a href="{{ url_for('transaction.list_transactions') }}" class="btn btn-secondary mt-3">Back to List</a>
+    </div>
+</div>
+{% endblock %}

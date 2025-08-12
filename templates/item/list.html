@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Items List{% endblock %}
+
+{% block content %}
+<h1>Items</h1>
+<div class="row">
+    {% for item in items %}
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ item.name }}</h5>
+                <p class="card-text">Price: Rp {{ "{:,.0f}".format(item.price) }}</p>
+                <p class="card-text">
+                    {% if item.tags %}
+                    {% for tag in item.tags %}
+                    <span class="badge bg-secondary me-1">{{ tag.name }}</span>
+                    {% endfor %}
+                    {% endif %}
+                </p>
+                {% if item.qty == 0 %}
+                <a href="{{ url_for('item.view_item', item_id=item.id) }}" class="btn btn-primary">View Details</a>
+                <a class="btn btn-danger">SOLD OUT</a>
+                {% else %}
+                <a href="{{ url_for('item.view_item', item_id=item.id) }}" class="btn btn-primary">View Details</a>
+                <a href="{{ url_for('transaction.create_transaction') }}?item_id={{ item.id }}" class="btn btn-success">Buy Now</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Item Management System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="mb-3">
+            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+        </h2>
+        <p class="text-muted">Selamat datang, {{ username }}! Berikut adalah ringkasan data Anda.</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">
+                            <i class="fas fa-box me-2"></i>Items
+                        </h5>
+                        <h3 class="mb-0">{{ items|length }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-box fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <a href="{{ url_for('item.list_items') }}" class="btn btn-outline-light btn-sm mt-2">
+                    <i class="fas fa-eye me-1"></i>Lihat Items
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-box me-2"></i>Recent Items
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if items %}
+                    <div class="list-group list-group-flush">
+                        {% for item in items[:5] %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6>
+                                    <a class="blacked" href="{{ url_for('item.view_item', item_id=item.id) }}" class="mb-1">{{ item.name }}</a>
+                                </h6> 
+                                <small class="text-muted">Rp {{ "{:,.0f}".format(item.price) }}</small><br>
+                                {% if item.tags %}
+                                {% for tag in item.tags %}
+                                    <span class="badge bg-secondary me-1">{{ tag.name }}</span>
+                                {% endfor %}
+                                {% endif %}
+                            </div>
+                            <a href="{{ url_for('item.view_item_store', store_id=item.store['id']) }}" class="btn btn-primary">{{ item.store_name if item.store_name else 'No Store' }}</a>
+                            <span class="badge bg-primary rounded-pill"></span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% if items|length > 5 %}
+                        <div class="text-center mt-3">
+                            <a href="{{ url_for('item.list_items') }}" class="btn btn-outline-primary btn-sm">
+                                Lihat Semua Items
+                            </a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <p class="text-muted text-center mb-0">Belum ada items</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

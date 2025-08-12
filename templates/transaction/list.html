@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Transactions{% endblock %}
+
+{% block content %}
+<h1>Transactions</h1>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Total Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ transaction.item['name'] }}</td>
+                <td>{{ transaction.qty }}</td>
+                <td>Rp {{ "{:,.0f}".format(transaction.item['price']) }}</td>
+                <td>{{ transaction.transaction_status['nama_status'] }}</td>
+                <td>
+                    <a href="{{ url_for('transaction.view_transaction', transaction_id=transaction.id) }}" class="btn btn-primary btn-sm">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
